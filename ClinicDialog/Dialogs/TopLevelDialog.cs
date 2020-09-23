@@ -11,6 +11,7 @@ namespace Microsoft.BotBuilderSamples
 {
     public class TopLevelDialog : ComponentDialog
     {
+        #region initial 
         // Define a "done" response for the company selection prompt.
         private const string DoneOption = "done";
 
@@ -22,20 +23,27 @@ namespace Microsoft.BotBuilderSamples
         {
             AddDialog(new TextPrompt(nameof(TextPrompt)));
             AddDialog(new NumberPrompt<int>(nameof(NumberPrompt<int>)));
-
+            
+            AddDialog(new TextPrompt(nameof(TextPrompt)));
+            AddDialog(new TextPrompt(nameof(TextPrompt)));
+            
             AddDialog(new ReviewSelectionDialog());
 
             AddDialog(new WaterfallDialog(nameof(WaterfallDialog), new WaterfallStep[]
             {
                 NameStepAsync,
                 AgeStepAsync,
+                PhoneNumberStepAsync,
+                EmailStepAsync,
                 StartSelectionStepAsync,
                 AcknowledgementStepAsync,
             }));
 
             InitialDialogId = nameof(WaterfallDialog);
         }
+        #endregion
 
+        #region ask name 
         private static async Task<DialogTurnResult> NameStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             // Create an object in which to collect the user's information within the dialog.
@@ -46,7 +54,9 @@ namespace Microsoft.BotBuilderSamples
             // Ask the user to enter their name.
             return await stepContext.PromptAsync(nameof(TextPrompt), promptOptions, cancellationToken);
         }
+        #endregion
 
+        #region ask age
         private async Task<DialogTurnResult> AgeStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             // Set the user's name to what they entered in response to the name prompt.
@@ -58,18 +68,46 @@ namespace Microsoft.BotBuilderSamples
             // Ask the user to enter their age.
             return await stepContext.PromptAsync(nameof(NumberPrompt<int>), promptOptions, cancellationToken);
         }
+        #endregion
 
+        #region ask phone number
+        private async Task<DialogTurnResult> PhoneNumberStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
+        {
+            var userProfile = (UserProfile)stepContext.Values[UserInfo];
+            userProfile.Age = (int)stepContext.Result;
+
+            var promptOptions = new PromptOptions { Prompt = MessageFactory.Text("Please enter your phone number.") };
+
+            return await stepContext.PromptAsync(nameof(TextPrompt), promptOptions, cancellationToken);
+        }
+        #endregion
+
+
+        #region ask email
+        private async Task<DialogTurnResult> EmailStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
+        {
+            var userProfile = (UserProfile)stepContext.Values[UserInfo];
+            userProfile.PhoneNumber = (string)stepContext.Result;
+
+            var promptOptions = new PromptOptions { Prompt = MessageFactory.Text("Please enter your Email address.") };
+
+            return await stepContext.PromptAsync(nameof(TextPrompt), promptOptions, cancellationToken);
+        }
+        #endregion
+
+
+        #region selection 
         private async Task<DialogTurnResult> StartSelectionStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             // Set the user's age to what they entered in response to the age prompt.
             var userProfile = (UserProfile)stepContext.Values[UserInfo];
-            userProfile.Age = (int)stepContext.Result;
+            userProfile.Email = (string)stepContext.Result;
 
-            if (userProfile.Age < 25)
+            if (userProfile.Age < 16)
             {
                 // If they are too young, skip the review selection dialog, and pass an empty list to the next step.
                 await stepContext.Context.SendActivityAsync(
-                    MessageFactory.Text("You must be 25 or older to participate."),
+                    MessageFactory.Text("You are to young, just call your mom to take you back."),
                     cancellationToken);
                 return await stepContext.NextAsync(new List<string>(), cancellationToken);
             }
@@ -79,7 +117,9 @@ namespace Microsoft.BotBuilderSamples
                 return await stepContext.BeginDialogAsync(nameof(ReviewSelectionDialog), null, cancellationToken);
             }
         }
+        #endregion
 
+        #region acknowledgement
         private async Task<DialogTurnResult> AcknowledgementStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             // Set the user's company selection to what they entered in the review-selection dialog.
@@ -94,5 +134,6 @@ namespace Microsoft.BotBuilderSamples
             // Exit the dialog, returning the collected user information.
             return await stepContext.EndDialogAsync(stepContext.Values[UserInfo], cancellationToken);
         }
+        #endregion
     }
 }

@@ -13,6 +13,7 @@ namespace Microsoft.BotBuilderSamples
 {
     public class ReviewSelectionDialog : ComponentDialog
     {
+        #region init 
         // Define a "done" response for the company selection prompt.
         private const string DoneOption = "done";
 
@@ -38,7 +39,9 @@ namespace Microsoft.BotBuilderSamples
 
             InitialDialogId = nameof(WaterfallDialog);
         }
+        #endregion
 
+        #region selection step details
         private async Task<DialogTurnResult> SelectionStepAsync(
             WaterfallStepContext stepContext,
             CancellationToken cancellationToken)
@@ -77,7 +80,9 @@ namespace Microsoft.BotBuilderSamples
             // Prompt the user for a choice.
             return await stepContext.PromptAsync(nameof(ChoicePrompt), promptOptions, cancellationToken);
         }
+        #endregion
 
+        #region loop steps 
         private async Task<DialogTurnResult> LoopStepAsync(
             WaterfallStepContext stepContext,
             CancellationToken cancellationToken)
@@ -104,5 +109,6 @@ namespace Microsoft.BotBuilderSamples
                 return await stepContext.ReplaceDialogAsync(nameof(ReviewSelectionDialog), list, cancellationToken);
             }
         }
+        #endregion
     }
 }

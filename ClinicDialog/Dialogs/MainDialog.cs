@@ -10,11 +10,13 @@ namespace Microsoft.BotBuilderSamples
 {
     public class MainDialog : ComponentDialog
     {
+        #region init 
         private readonly UserState _userState;
 
         public MainDialog(UserState userState)
             : base(nameof(MainDialog))
         {
+
             _userState = userState;
 
             AddDialog(new TopLevelDialog());
@@ -27,12 +29,16 @@ namespace Microsoft.BotBuilderSamples
 
             InitialDialogId = nameof(WaterfallDialog);
         }
+        #endregion
 
+        #region initial step
         private async Task<DialogTurnResult> InitialStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             return await stepContext.BeginDialogAsync(nameof(TopLevelDialog), null, cancellationToken);
         }
+        #endregion
 
+        #region End point 
         private async Task<DialogTurnResult> FinalStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             var userInfo = (UserProfile)stepContext.Result;
@@ -48,5 +54,6 @@ namespace Microsoft.BotBuilderSamples
 
             return await stepContext.EndDialogAsync(null, cancellationToken);
         }
+        #endregion
     }
 }
