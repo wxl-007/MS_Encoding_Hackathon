@@ -30,7 +30,7 @@ namespace Microsoft.BotBuilderSamples
                 if (member.Id != turnContext.Activity.Recipient.Id)
                 {
                     var reply = MessageFactory.Text($"Dear Patient. Welcome to Clinic Dialog Bot from ServeCA team. " +
-                        "This bot provides a conversation, with multiple choice questions. " +
+                        "This bot provides a conversation, please answer these question carefully, these could help doctors to diagnose you quickly!" +
                         "Type anything to get started.");
                     await turnContext.SendActivityAsync(reply, cancellationToken);
                 }
